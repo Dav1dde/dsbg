@@ -25,7 +25,6 @@ class SummaryTreeprocessor(Treeprocessor):
         if not element.text and len(element) == 0:
             parents[-2].remove(element)
 
-
     def run(self, root):
         found = False
         # instead of creating a new tree from scratch,
@@ -54,14 +53,15 @@ class SummaryTreeprocessor(Treeprocessor):
 
 class SummaryExtension(Extension):
     TreeProcessorClass = SummaryTreeprocessor
+    config = {
+        'marker': [
+            '[SUMMARY]',
+            'summary goes until this mark is found, defaults to [SUMMARY]'
+        ]
+    }
 
     def __init__(self, configs=None):
-        self.config = {
-            'marker': [
-                '[SUMMARY]',
-                'summary goes until this mark is found, defaults to [SUMMARY]'
-            ]
-        }
+        Extension.__init__(self)
 
         configs = dict() if configs is None else configs
         for key, value in configs:

@@ -1,7 +1,7 @@
-from pygments.lexer import Lexer, RegexLexer, include, inherit
+from pygments.lexer import inherit
 from pygments.lexers.compiled import DLexer
-from pygments.token import Text, Comment, Operator, Keyword, Name, String, \
-     Number, Punctuation, Error, Literal, Generic
+from pygments.token import Keyword, Name
+
 
 class VoltLexer(DLexer):
     """
@@ -42,7 +42,7 @@ def add_lexers(lexers):
 add_lexers([VoltLexer])
 
 if __name__ == '__main__':
-    from pygments.lexers import guess_lexer, get_lexer_by_name
+    from pygments.lexers import get_lexer_by_name
     from pygments.lexers._mapping import LEXERS
 
     print LEXERS
