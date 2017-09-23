@@ -35,12 +35,12 @@ class SummaryTreeprocessor(Treeprocessor):
             # if len(parents) is 1, only the root is left
             if found and len(parents) > 1:
                 parents[-2].remove(element)
-            elif self.config['marker'] in element.text:
+            elif element.text and self.config['marker'] in element.text:
                 self.cleanup_marker(self.config['marker'], parents, element)
                 found = True
 
         for parents, element in self.itertree(root, (root,)):
-            if self.config['marker'] in element.text:
+            if element.text and self.config['marker'] in element.text:
                 self.cleanup_marker(self.config['marker'], parents, element)
 
         output = etree.tostring(clone, encoding='utf-8', method='html')

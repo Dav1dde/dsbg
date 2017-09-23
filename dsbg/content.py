@@ -121,6 +121,7 @@ class Post(Content):
     @property
     def url(self):
         return '/'.join([
+            '',
             'posts',
             self.date.isoformat(),
             self.slug
@@ -139,7 +140,7 @@ class Site(Content):
 
     @property
     def path(self):
-        return self.slug
+        return '/' + self.slug
 
     @property
     def url(self):
