@@ -2,13 +2,16 @@ from __future__ import unicode_literals
 
 import codecs
 import os.path
-from hashlib import md5
-from datetime import date
 
+import collections
 import markdown
 
 from dsbg.summary import SummaryExtension
-from dsbg.util import slugify, date_from_string
+from dsbg.util import slugify, date_from_string, listdir_fullpath
+
+
+StaticFile = collections.namedtuple('StaticFile', ['path', 'name'])
+
 
 def split_header(f):
     header = dict()
@@ -24,6 +27,7 @@ def split_header(f):
 
     return header, f.read()
 
+
 class Content(object):
     requires_fields = []
 
@@ -33,7 +37,7 @@ class Content(object):
             extensions=[
                 'toc', 'codehilite', SummaryExtension()
             ],
-            extension_configs = {}
+            extension_configs={}
         )
 
         self._content = ''
@@ -41,21 +45,30 @@ class Content(object):
         self.html_summary = ''
         self.has_summary = False
         self.toc = ''
+        self.static_files = []
+
+        content_path = path
+        if os.path.isdir(path):
+            content_path = os.path.join(path, os.path.basename(path.rstrip('/')) + '.md')
+            self.static_files = [
+                StaticFile(e, os.path.relpath(e, path))
+                for e in listdir_fullpath(path) if not e == content_path
+            ]
 
         try:
-            with codecs.open(path, 'r') as f:
+            with codecs.open(content_path, 'r') as f:
                 header, self.content = split_header(f)
 
             for name, func in self.requires_fields:
                 setattr(self, name, func(header[name]))
         except (ValueError, StopIteration) as e:
             raise ValueError(
-                'Invalid Header in File: "{}", "{}"'.format(path, e.message)
+                'Invalid Header in File: "{}", "{}"'.format(content_path, e.message)
             )
         except KeyError as e:
             raise ValueError(
                 'Invalid Header in File: "{}", missing field "{}"'
-                    .format(path, e.message)
+                    .format(content_path, e.message)
             )
 
     @property
@@ -71,7 +84,6 @@ class Content(object):
         self.parser.reset()
 
         self._content = x
-
 
     @property
     def data(self):
@@ -103,8 +115,7 @@ class Post(Content):
         return os.path.join(
             'posts',
             self.date.isoformat(),
-            self.slug,
-            'index.html'
+            self.slug
         )
 
     @property
@@ -128,7 +139,7 @@ class Site(Content):
 
     @property
     def path(self):
-        return os.path.join(self.slug, 'index.html')
+        return self.slug
 
     @property
     def url(self):

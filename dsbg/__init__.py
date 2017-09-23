@@ -53,11 +53,11 @@ class DSBG(object):
             generator.run()
 
     def gather(self):
-        posts = [
+        posts = sorted([
             Post(
                 os.path.join(os.path.join(self.path, 'posts'), f)
             ) for f in dsbg.util.listdir_safe(os.path.join(self.path, 'posts'))
-        ]
+        ], key=lambda x: x.date, reverse=True)
 
         sites = [
             Site(
