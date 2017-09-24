@@ -9,11 +9,11 @@ import re
 import markdown.util
 from jinja2 import Environment, FileSystemLoader
 
-import dsbg.ext.voltlexer  # import it, so the lexer is registered
+import dsbg.ext.pygments.voltlexer  # import it, so the lexer is registered
+import dsbg.util
 from dsbg.content import Site, Post, Other
 from dsbg.generator import GENERATORS
 from dsbg.writer import Writer
-import dsbg.util
 
 markdown.util.BLOCK_LEVEL_ELEMENTS = re.compile(
     r'^(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul'

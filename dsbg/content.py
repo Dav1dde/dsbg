@@ -1,14 +1,14 @@
 from __future__ import unicode_literals
 
 import codecs
+import collections
 import os.path
 
-import collections
 import markdown
 
-from dsbg.summary import SummaryExtension
+from dsbg.ext.markdown.links import RelativeImageLinkExtension
+from dsbg.ext.markdown.summary import SummaryExtension
 from dsbg.util import slugify, date_from_string, listdir_fullpath
-
 
 StaticFile = collections.namedtuple('StaticFile', ['path', 'name'])
 
@@ -32,20 +32,20 @@ class Content(object):
     requires_fields = []
 
     def __init__(self, path):
-        self.parser = markdown.Markdown(
-            output_format='html5',
-            extensions=[
-                'toc', 'codehilite', SummaryExtension()
-            ],
-            extension_configs={}
-        )
-
         self._content = ''
         self.html = ''
         self.html_summary = ''
         self.has_summary = False
         self.toc = ''
         self.static_files = []
+
+        self.parser = markdown.Markdown(
+            output_format='html5',
+            extensions=[
+                'toc', 'codehilite', RelativeImageLinkExtension(url_prefix_resolver=lambda: self.url), SummaryExtension()
+            ],
+            extension_configs={}
+        )
 
         content_path = path
         if os.path.isdir(path):
@@ -57,7 +57,7 @@ class Content(object):
 
         try:
             with codecs.open(content_path, 'r') as f:
-                header, self.content = split_header(f)
+                header, content = split_header(f)
 
             for name, func in self.requires_fields:
                 setattr(self, name, func(header[name]))
@@ -70,6 +70,8 @@ class Content(object):
                 'Invalid Header in File: "{}", missing field "{}"'
                     .format(content_path, e.message)
             )
+
+        self.content = content
 
     @property
     def content(self):
